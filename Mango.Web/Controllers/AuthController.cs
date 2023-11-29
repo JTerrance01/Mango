@@ -14,12 +14,12 @@ namespace Mango.Web.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
-        //private readonly ITokenProvider _tokenProvider;
+        private readonly ITokenProvider _tokenProvider;
 
-        public AuthController(IAuthService authService /*ITokenProvider tokenProvider*/)
+        public AuthController(IAuthService authService, ITokenProvider tokenProvider)
         {
             _authService = authService;
-           //_tokenProvider = tokenProvider;
+            _tokenProvider = tokenProvider;
         }
 
         [HttpGet]
@@ -40,7 +40,7 @@ namespace Mango.Web.Controllers
                     JsonConvert.DeserializeObject<LoginResponseDto>(Convert.ToString(responseDto.Result));
 
                 await SignInUser(loginResponseDto);
-                //_tokenProvider.SetToken(loginResponseDto.Token);
+                _tokenProvider.SetToken(loginResponseDto.Token);
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -102,7 +102,7 @@ namespace Mango.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            //_tokenProvider.ClearToken();
+            _tokenProvider.ClearToken();
             return RedirectToAction("Index", "Home");
         }
 

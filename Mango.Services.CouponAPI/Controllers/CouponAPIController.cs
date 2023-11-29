@@ -2,12 +2,14 @@
 using Mango.Services.CouponAPI.Data;
 using Mango.Services.CouponAPI.Models;
 using Mango.Services.CouponAPI.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.CouponAPI.Controllers
 {
     [Route("api/coupon")]
     [ApiController]
+    [Authorize]
     public class CouponAPIController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -17,17 +19,17 @@ namespace Mango.Services.CouponAPI.Controllers
         public CouponAPIController(AppDbContext db, IMapper mapper)
         {
             _db = db;
-            _response = new ResponseDto();
             _mapper = mapper;
+            _response = new ResponseDto();
         }
 
         [HttpGet]
-        public ResponseDto GetAllCoupons()
+        public ResponseDto Get()
         {
             try
             {
                 IEnumerable<Coupon> objList = _db.Coupons.ToList();
-                _response.Result = _mapper.Map<IEnumerable<CouponDto>>(objList);                                
+                _response.Result = _mapper.Map<IEnumerable<CouponDto>>(objList);
             }
             catch (Exception ex)
             {
@@ -38,13 +40,13 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpGet]
-        [Route("GetById/{id:int}")]
-        public ResponseDto GetById(int id)
+        [Route("{id:int}")]
+        public ResponseDto Get(int id)
         {
             try
             {
-                Coupon obj = _db.Coupons.Single(c => id == c.CouponId);
-                _response.Result  = _mapper.Map<CouponDto>(obj);                
+                Coupon obj = _db.Coupons.First(u => u.CouponId == id);
+                _response.Result = _mapper.Map<CouponDto>(obj);
             }
             catch (Exception ex)
             {
@@ -60,7 +62,7 @@ namespace Mango.Services.CouponAPI.Controllers
         {
             try
             {
-                Coupon obj = _db.Coupons.First(c => code == c.CouponCode.ToLower());                
+                Coupon obj = _db.Coupons.First(u => u.CouponCode.ToLower() == code.ToLower());
                 _response.Result = _mapper.Map<CouponDto>(obj);
             }
             catch (Exception ex)
@@ -71,7 +73,8 @@ namespace Mango.Services.CouponAPI.Controllers
             return _response;
         }
 
-        [HttpPost]        
+        [HttpPost]
+        [Authorize(Roles = "ADMIN")]
         public ResponseDto Post([FromBody] CouponDto couponDto)
         {
             try
@@ -80,6 +83,19 @@ namespace Mango.Services.CouponAPI.Controllers
                 _db.Coupons.Add(obj);
                 _db.SaveChanges();
 
+
+
+                //var options = new Stripe.CouponCreateOptions
+                //{
+                //    AmountOff = (long)(couponDto.DiscountAmount * 100),
+                //    Name = couponDto.CouponCode,
+                //    Currency = "usd",
+                //    Id = couponDto.CouponCode,
+                //};
+                //var service = new Stripe.CouponService();
+                //service.Create(options);
+
+
                 _response.Result = _mapper.Map<CouponDto>(obj);
             }
             catch (Exception ex)
@@ -90,7 +106,9 @@ namespace Mango.Services.CouponAPI.Controllers
             return _response;
         }
 
+
         [HttpPut]
+        [Authorize(Roles = "ADMIN")]
         public ResponseDto Put([FromBody] CouponDto couponDto)
         {
             try
@@ -110,14 +128,21 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("Delete/{id:int}")]
+        [Route("{id:int}")]
+        [Authorize(Roles = "ADMIN")]
         public ResponseDto Delete(int id)
         {
             try
             {
-                Coupon obj = _db.Coupons.First(c => id == c.CouponId);                
+                Coupon obj = _db.Coupons.First(u => u.CouponId == id);
                 _db.Coupons.Remove(obj);
                 _db.SaveChanges();
+
+
+                //var service = new Stripe.CouponService();
+                //service.Delete(obj.CouponCode);
+
+
             }
             catch (Exception ex)
             {

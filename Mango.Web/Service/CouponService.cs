@@ -1,7 +1,6 @@
 ﻿using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Mango.Web.Utilities;
-
 namespace Mango.Web.Service
 {
     public class CouponService: ICouponService

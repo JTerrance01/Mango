@@ -65,7 +65,7 @@ namespace Mango.Services.AuthAPI.Service
             LoginResponseDto loginResponseDto = new LoginResponseDto()
             {
                 User = userDTO,
-                //Token = token
+                Token = token
             };
 
             return loginResponseDto;
