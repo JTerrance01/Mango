@@ -40,6 +40,6 @@ namespace Mango.Web.Service
                 Data = registrationRequestDto,
                 Url = SD.AuthAPIBase + "/api/auth/register"
             }, withBearer: false);
-        }
+        }        
     }
 }

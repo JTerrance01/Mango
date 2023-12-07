@@ -13,11 +13,11 @@ namespace Mango.Web.Controllers
     public class HomeController : Controller
     {
         private readonly IProductService _productService;
-        //private readonly ICartService _cartService;
-        public HomeController(IProductService productService/*, ICartService cartService*/)
+        private readonly ICartService _cartService;
+        public HomeController(IProductService productService, ICartService cartService)
         {
             _productService = productService;
-            //_cartService = cartService;
+            _cartService = cartService;
         }
 
 
@@ -81,17 +81,17 @@ namespace Mango.Web.Controllers
             List<CartDetailsDto> cartDetailsDtos = new() { cartDetails };
             cartDto.CartDetails = cartDetailsDtos;
 
-            //ResponseDto? response = await _cartService.UpsertCartAsync(cartDto);
+            ResponseDto? response = await _cartService.UpsertCartAsync(cartDto);
 
-            //if (response != null && response.IsSuccess)
-            //{
-            //    TempData["success"] = "Item has been added to the Shopping Cart";
-            //    return RedirectToAction(nameof(Index));
-            //}
-            //else
-            //{
-            //    TempData["error"] = response?.Message;
-            //}
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Item has been added to the Shopping Cart";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                TempData["error"] = response?.Message;
+            }
 
             return View(productDto);
         }
