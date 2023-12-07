@@ -77,6 +77,8 @@ app.UseSwaggerUI(c =>
         c.RoutePrefix = string.Empty;
     }
 });
+
+// Stripe API Key -> appsettings
 Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
 app.UseHttpsRedirection();
