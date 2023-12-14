@@ -176,7 +176,6 @@ namespace Mango.Services.OrderAPI.Controllers
         {
             try
             {
-
                 OrderHeader orderHeader = _db.OrderHeaders.First(u => u.OrderHeaderId == orderHeaderId);
 
                 var service = new SessionService();
@@ -191,6 +190,8 @@ namespace Mango.Services.OrderAPI.Controllers
                     orderHeader.PaymentIntentId = paymentIntent.Id;
                     orderHeader.Status = SD.Status_Approved;
                     _db.SaveChanges();
+
+                    //Send message to Azure ServiceBus
                     RewardsDto rewardsDto = new()
                     {
                         OrderId = orderHeader.OrderHeaderId,

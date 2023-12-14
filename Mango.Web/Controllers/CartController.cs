@@ -63,6 +63,7 @@ namespace Mango.Web.Controllers
                                             (Convert.ToString(stripeResponse.Result));
                 Response.Headers.Add("Location", stripeResponseResult.StripeSessionUrl);
 
+                //Status code 303 denotes a redirect to another page.
                 return new StatusCodeResult(303);
             }
 
