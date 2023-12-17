@@ -2,14 +2,14 @@
 using Mango.Services.ProductAPI.Data;
 using Mango.Services.ProductAPI.Models;
 using Mango.Services.ProductAPI.Models.Dto;
+using Mango.Services.ProductAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.ProductAPI.Controllers
 {
 	[Route("api/product")]
-	[ApiController]
-	//[Authorize]
+	[ApiController]	
 	public class ProductAPIController : ControllerBase
 	{
 		private readonly AppDbContext _db;
@@ -62,32 +62,13 @@ namespace Mango.Services.ProductAPI.Controllers
 		{
 			try
 			{
-				Product product = _mapper.Map<Product>(ProductDto);
+				Product product = _mapper.Map<Product>(ProductDto);				
 				_db.Products.Add(product);
 				_db.SaveChanges();
 
 				if (ProductDto.Image != null)
 				{
-
-					string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
-					string filePath = @"wwwroot\ProductImages\" + fileName;
-
-					//I have added the if condition to remove the any image with same name if that exist in the folder by any change
-					var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
-					FileInfo file = new FileInfo(directoryLocation);
-					if (file.Exists)
-					{
-						file.Delete();
-					}
-
-					var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
-					using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
-					{
-						ProductDto.Image.CopyTo(fileStream);
-					}
-					var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
-					product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
-					product.ImageLocalPath = filePath;
+					SaveProductImageToServer(ProductDto, product);
 				}
 				else
 				{
@@ -116,28 +97,8 @@ namespace Mango.Services.ProductAPI.Controllers
 
 				if (ProductDto.Image != null)
 				{
-					if (!string.IsNullOrEmpty(product.ImageLocalPath))
-					{
-						var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
-						FileInfo file = new FileInfo(oldFilePathDirectory);
-						if (file.Exists)
-						{
-							file.Delete();
-						}
-					}
-
-					string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
-					string filePath = @"wwwroot\ProductImages\" + fileName;
-					var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
-					using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
-					{
-						ProductDto.Image.CopyTo(fileStream);
-					}
-					var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
-					product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
-					product.ImageLocalPath = filePath;
+					SaveProductImageToServer(ProductDto, product);
 				}
-
 
 				_db.Products.Update(product);
 				_db.SaveChanges();
@@ -159,17 +120,15 @@ namespace Mango.Services.ProductAPI.Controllers
 		{
 			try
 			{
-				Product obj = _db.Products.First(u => u.ProductId == id);
-				if (!string.IsNullOrEmpty(obj.ImageLocalPath))
+				Product product = _db.Products.First(u => u.ProductId == id);
+				if (!string.IsNullOrEmpty(product.ImageLocalPath))
 				{
-					var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), obj.ImageLocalPath);
-					FileInfo file = new FileInfo(oldFilePathDirectory);
-					if (file.Exists)
-					{
-						file.Delete();
-					}
+					// Delete the image from the server physically
+					DeleteImageFromFolder(product);
 				}
-				_db.Products.Remove(obj);
+				
+				// Delete the product from the database
+				_db.Products.Remove(product);
 				_db.SaveChanges();
 			}
 			catch (Exception ex)
@@ -179,5 +138,45 @@ namespace Mango.Services.ProductAPI.Controllers
 			}
 			return _response;
 		}
+
+		#region PRODUCT HELPERS
+		public Product SaveProductImageToServer(ProductDto ProductDto, Product product)
+		{
+			string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
+			string filePath = @"wwwroot\ProductImages\" + fileName;
+
+			//I have added the if condition to remove any image with same name if one exist in the folder by any change
+			var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+			FileInfo file = new FileInfo(directoryLocation);
+			if (file.Exists)
+			{
+				file.Delete();
+			}
+
+			var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+			using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
+			{
+				ProductDto.Image.CopyTo(fileStream);
+			}
+			var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+			product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
+			product.ImageLocalPath = filePath;
+
+			// Resize the image
+			ImageResizer.ResizeImage(filePath);
+
+			return product;
+		}
+
+		public void DeleteImageFromFolder(Product product)
+		{
+			var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
+			FileInfo file = new FileInfo(oldFilePathDirectory);
+			if (file.Exists)
+			{
+				file.Delete();
+			}
+		}
+		#endregion
 	}
 }

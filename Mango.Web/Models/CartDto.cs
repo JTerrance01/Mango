@@ -4,5 +4,6 @@
     {
         public CartHeaderDto CartHeader { get; set; }
         public IEnumerable<CartDetailsDto>? CartDetails { get; set; }
+        public int NumberOfCartItems { get; set; }        
     }
 }

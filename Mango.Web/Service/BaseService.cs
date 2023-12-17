@@ -51,6 +51,8 @@ namespace Mango.Web.Service
 						if (value is FormFile)
 						{
 							var file = (FormFile)value;
+
+							//If FormFile data is present (product image attached) StreamContent is used to read the uploaded file
 							if (file != null)
 							{
 								content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);

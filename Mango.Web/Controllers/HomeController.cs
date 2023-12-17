@@ -1,12 +1,11 @@
 using IdentityModel;
 using Mango.Web.Models;
 using Mango.Web.Service.IService;
-using Mango.Web.Utilities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Mango.Web.Controllers
 {
@@ -25,7 +24,7 @@ namespace Mango.Web.Controllers
         {
             List<ProductDto>? list = new();
 
-            ResponseDto? response = await _productService.GetAllProductsAsync();
+            ResponseDto? response = await _productService.GetAllProductsAsync();            
 
             if (response != null && response.IsSuccess)
             {
@@ -107,5 +106,6 @@ namespace Mango.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        
     }
 }
