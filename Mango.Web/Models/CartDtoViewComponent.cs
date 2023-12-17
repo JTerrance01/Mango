@@ -20,14 +20,19 @@ namespace Mango.Web.Models
         {
             CartDto? cartDto = new();
             var claimsIdentity = _contextAccessor.HttpContext.User.Identity as ClaimsIdentity;
-            var userDataClaim = claimsIdentity?.FindFirst("sub");
-            var userId = userDataClaim?.Value;
-            ResponseDto? response = await _cartService.GetCartByUserIdAsnyc(userId);
-            if (response != null & response.IsSuccess)
+            var userClaim = claimsIdentity?.FindFirst("sub");
+
+            if (userClaim != null)
             {
-                cartDto = JsonConvert.DeserializeObject<CartDto>(Convert.ToString(response.Result));
-                cartDto.NumberOfCartItems = (int)cartDto.CartDetails?.Count();
-            }
+				var userId = userClaim.Value;
+				ResponseDto? response = await _cartService.GetCartByUserIdAsnyc(userId);
+				if (response != null & response.IsSuccess)
+				{
+					cartDto = JsonConvert.DeserializeObject<CartDto>(Convert.ToString(response.Result));
+					cartDto.NumberOfCartItems = (int)cartDto.CartDetails?.Count();
+				}
+			}
+            
             return View(cartDto);
         }
     }
