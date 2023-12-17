@@ -59,8 +59,9 @@ namespace Mango.Web.Controllers
                 new SelectListItem{Text=SD.RoleAdmin,Value=SD.RoleAdmin},
                 new SelectListItem{Text=SD.RoleCustomer,Value=SD.RoleCustomer},
             };
-
+            
             ViewBag.RoleList = roleList;
+            ViewBag.IsInDevelopmentMode = string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "development", StringComparison.InvariantCultureIgnoreCase);
             return View();
         }
 
