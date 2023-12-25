@@ -12,11 +12,13 @@ namespace Mango.Web.Controllers
     {
         private readonly ICartService _cartService;
         private readonly IOrderService _orderService;
+        private readonly ICouponService _couponService;
 
-        public CartController(ICartService cartService, IOrderService orderService)
+        public CartController(ICartService cartService, IOrderService orderService, ICouponService couponService)
         {
             _cartService = cartService;
             _orderService = orderService;
+            _couponService = couponService; 
         }
 
         [Authorize]
@@ -102,13 +104,23 @@ namespace Mango.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> ApplyCoupon(CartDto cartDto)
         {
-
-            ResponseDto? response = await _cartService.ApplyCouponAsync(cartDto);
-            if (response != null & response.IsSuccess)
+            //Validate Coupon
+            ResponseDto? couponResponse = await _couponService.GetCouponByCodeAsync(cartDto.CartHeader.CouponCode);
+            var coupon = JsonConvert.DeserializeObject<CouponDto>(Convert.ToString(couponResponse.Result));
+            if (coupon != null)
             {
-                TempData["success"] = "Cart updated successfully";
-                return RedirectToAction(nameof(CartIndex));
+                ResponseDto? response = await _cartService.ApplyCouponAsync(cartDto);
+                if (response != null & response.IsSuccess)
+                {
+                    TempData["success"] = "Cart updated successfully";
+                    return RedirectToAction(nameof(CartIndex));
+                }
             }
+            else
+            {
+                TempData["error"] = "Coupon is not valid";
+                return RedirectToAction(nameof(CartIndex));
+            }            
             return View();
         }
 

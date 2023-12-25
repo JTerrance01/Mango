@@ -10,7 +10,7 @@
                 <div class="col-6">
                     <h3 class="text-success"><i class="bi bi-cart"></i> &nbsp; Shopping Cart</h3>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-6 text-end">                    
                     <a asp-action="Index" asp-controller="Home" class="btn btn-outline-warning mt-2 btn-sm">Continue Shopping</a>
                 </div>
             </div>
@@ -49,8 +49,8 @@
                     <div class="col-3 col-md-2 pt-md-4" style="font-size:11px;">
                         <span style="font-size:17px;"> @cartObj.Count</span>
                     </div>
-                    <div class="col-2 col-lg-1 p-0 pt-lg-4 text-center">
-                        <a asp-action="Remove" asp-route-cartDetailsId="@cartObj.CartDetailsId" class="btn btn-sm btn-danger">
+                    <div class="col-2 col-lg-1 p-0 pt-lg-4 text-center">                        
+                        <a asp-action="Remove" asp-route-cartDetailsId="@cartObj.CartDetailsId" class="btn btn-sm ">
                             <i class="bi bi-trash-fill"></i>
                         </a>
                     </div>
@@ -61,15 +61,17 @@
                     <div class="col-6">
                         @if (string.IsNullOrEmpty(Model.CartHeader.CouponCode))
                         {
-                            <span>Coupon:</span>
+                            <div><span>Add Coupon</span></div>  
                             <input asp-for="CartHeader.CouponCode" />
-                            <button type="submit" asp-action="ApplyCoupon" class="btn btn-sm btn-success"> Apply </button>
+                            <br /><br />
+                            <button type="submit" asp-action="ApplyCoupon" class="btn btn-sm btn-success"> Apply Coupon</button>
                         }
                         else
-                        {
-                            <span>Coupon:</span>
+                        {     
+                            <div><span>Coupon</span></div>                            
                             <input asp-for="CartHeader.CouponCode" disabled/>
-                            <button type="submit" asp-action="RemoveCoupon" class="btn btn-sm btn-success"> Remove </button>
+                            <br/><br/>
+                            <button type="submit" asp-action="RemoveCoupon" class="btn btn-sm btn-success"> Remove Coupon</button>
                         }
                     </div>
                     <div class="col-6 text-end">
